@@ -2,4 +2,5 @@ node_modules
 # .env
 package-lock.json
 package.json
+nodemon.json
 ngrok

@@ -6,7 +6,10 @@
 
 .waraper {
     margin: 0 40px;
-    width: auto;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Oxygen", "Ubuntu",
+    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
 }
 
 .header {
@@ -83,12 +86,12 @@ canvas {
 
 }
 
-.main-left .head {
+.head-main-left {
     border-bottom: 1px solid black;
     height: 62.4px;
 }
 
-.main-left .head h2 {
+.head-main-left h2 {
     text-align: center;
     margin: 0;
     /* margin-top: 10px; */
