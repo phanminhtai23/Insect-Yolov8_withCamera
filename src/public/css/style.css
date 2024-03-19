@@ -7,23 +7,30 @@
 .waraper {
     margin: 0 40px;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Oxygen", "Ubuntu",
-    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
--webkit-font-smoothing: antialiased;
--moz-osx-font-smoothing: grayscale;
+        "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .header {
     text-align: center;
 }
 
+
 .main {
     display: flex;
+    flex-wrap: wrap;
+
+    /* display: flex; */
     justify-content: center;
     border: 1px solid black;
 }
 
 .main-right {
-    width: 45%;
+    flex: 1;
+    /* margin: 5px; */
+
+    width: 40%;
     height: auto;
     display: flex;
     flex-direction: column;
@@ -32,8 +39,19 @@
     /* border: 1px solid black; */
 }
 
-.main-right .head {
+.main-left {
+    flex: 1;
+
+    width: 60%;
     border-left: 1px solid black;
+    display: flex;
+    flex-direction: column;
+
+}
+
+.head-main-right {
+
+    border-bottom: 1px solid black;
     display: flex;
     flex-direction: row;
     justify-content: space-around;
@@ -41,25 +59,26 @@
     width: 100%;
 }
 
-.main-right .head .io-camera {
+.head-main-right .io-camera {
     display: flex;
     flex-direction: column;
     justify-content: space-around;
     align-items: center
 }
 
-.main-right .head button {
+.head-main-right button {
     /* margin: 5px; */
     display: block;
 }
 
 
-.main-right .body {
+.body-main-right {
     width: 100%;
     height: 600px;
-    border-top: 1px solid black;
+    border: 0;
+    /* border-top: 1px solid black;
     border-left: 1px solid black;
-    border-right: 1px solid black;
+    border-right: 1px solid black; */
     background: url(../img/faculty-slider-placeholder.jpg);
     /* width: 650px;
     height: 650px; */
@@ -71,20 +90,11 @@ canvas {
     height: 100%;
 }
 
-.main-right input {
-    display: block;
-    text-align: center;
-    padding: 10px 10px 10px 10px;
-
-}
-
-.main-left {
-    width: 55%;
-    /* border: 1px solid black; */
+/* .main-right .parent-input {
     display: flex;
-    flex-direction: column;
-
-}
+    justify-content: center;
+    align-items: center;
+} */
 
 .head-main-left {
     border-bottom: 1px solid black;
@@ -98,7 +108,7 @@ canvas {
     line-height: 62.4px;
 }
 
-.main-left .body {
+.body-main-left {
     width: 100%;
     height: 100%;
 }
@@ -107,6 +117,9 @@ canvas {
     width: 700px;
 }
 
+.footer .title a {
+    text-decoration: none;
+}
 
 #webcam-container {
     position: relative;
@@ -120,6 +133,7 @@ canvas {
 
 #imageContainer {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
 }
 
@@ -138,13 +152,62 @@ canvas {
     /* align-items: center; */
 }
 
-#imageContainer button {
-    padding: 10px 20px;
-    background-color: #5b5f63;
-    color: #fff;
+#imageContainer .box h3 {
+    height: 20%;
+    margin: 10px;
+}
+
+#imageContainer .box button {
+    background-color: #dddddd;
+    color: #000000;
+    padding: 8px 10px;
     border: none;
     cursor: pointer;
+    width: 100%;
 }
+
+.custom-file-input {
+    position: relative;
+    display: inline-block;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.input-file {
+    display: none;
+}
+
+.file-label {
+    background-color: #dddddd;
+    color: #000000;
+    padding: 8px 10px;
+    border: none;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.file-label:hover {
+    background-color: #aaaaaa;
+}
+
+.io-camera button {
+    background-color: #dddddd;
+    color: #000000;
+    border: none;
+    padding: 3px 5px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
 
 
 /* cột đầu */
@@ -156,7 +219,7 @@ canvas {
 
 .table tr td:last-child {
     text-align: left;
-    padding-right: 30px;
+    padding: 0 30px 0 5px;
 }
 
 .table1 tr {
@@ -166,4 +229,92 @@ canvas {
     text-align: center;
     vertical-align: middle;
     top: 30px;
+}
+
+@media screen and (max-width: 850px) {
+    .waraper {
+        margin: 5px;
+        /* padding: 5px; */
+    }
+
+    .header h1 {
+        font-size: 25px;
+    }
+
+    .io-camera {
+        flex: 1;
+        flex-basis: 100%;
+        flex-direction: row !important;
+    }
+
+    .io-camera button {
+        padding: 10px;
+    }
+
+    .main-left,
+    .main-right {
+        flex: 1;
+        flex-basis: 100%;
+        /* Chiếm 55% chiều rộng của container cha khi màn hình lớn hơn hoặc bằng 768px */
+    }
+
+    .main-left {
+        border: 0;
+        /* margin-top: 10px; */
+    }
+
+    .head-main-left {
+        border-top: 1px solid black;
+        /* height: 45px; */
+    }
+
+    .head-main-left h2 {
+        border-top: 1px solid black;
+    }
+
+    .head-main-right {
+        border-bottom: 1px solid black;
+        width: 100%;
+        height: 15%;
+        flex-wrap: wrap;
+
+    }
+
+
+
+    .custom-file-input {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .io-camera button:hover {
+        background-color: #aaaaaa;
+    }
+
+    /* table */
+    .table {
+        border-collapse: collapse;
+    }
+
+    .table th,
+    .table td {
+        border: 1px solid black;
+    }
+
+    .footer {
+        width: 300px;
+    }
+
+    #imageContainer .box {
+        flex: 1;
+        /* flex-wrap: wrap; */
+        flex-basis: 100%;
+    }
+
+    #imageContainer img {
+        height: 100%;
+        width: 100%;
+        display: block;
+    }
 }

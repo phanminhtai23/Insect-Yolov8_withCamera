@@ -77,6 +77,14 @@ function draw_image_and_boxes(file, boxes) {
         // console.log("boxes   = ", boxes);
         // nếu có phát hiện
         if (boxes.length > 0) {
+            var max = 0, max_index = -1;
+            for (var i = 0; i < boxes.length; i++) {
+                if (boxes[i][5] > max) {
+                    max = boxes[i][5];
+                    max_index = i;
+                }
+            }
+
             table.setAttribute("class", "table");
             // Tạo hàng và cột cho bảng
             for (var i = 0; i < 5; i++) {
@@ -86,23 +94,21 @@ function draw_image_and_boxes(file, boxes) {
                 }
             }
 
-           
-
             // lấy id
             var id1;
-            if (boxes[0][4] == 'Sâu đục thân') {
+            if (boxes[max_index][4] == 'Sâu đục thân') {
                 id1 = 0;
-            } else if (boxes[0][4] == 'Bọ xít đen') {
+            } else if (boxes[max_index][4] == 'Bọ xít đen') {
                 id1 = 1;
-            } else if (boxes[0][4] == 'Bù lạch') {
+            } else if (boxes[max_index][4] == 'Bù lạch') {
                 id1 = 2;
-            } else if (boxes[0][4] == 'Dế nhũi') {
+            } else if (boxes[max_index][4] == 'Dế nhũi') {
                 id1 = 3;
-            } else if (boxes[0][4] == 'Rầy lưng xanh') {
+            } else if (boxes[max_index][4] == 'Rầy lưng xanh') {
                 id1 = 4;
-            } else if (boxes[0][4] == 'Rầy nâu') {
+            } else if (boxes[max_index][4] == 'Rầy nâu') {
                 id1 = 5;
-            } else if (boxes[0][4] == 'Sâu cuốn lá') {
+            } else if (boxes[max_index][4] == 'Sâu cuốn lá') {
                 id1 = 6;
             }
 
@@ -115,7 +121,7 @@ function draw_image_and_boxes(file, boxes) {
                     return response.json();
                 })
                 .then(data => {
-                    console.table('front-end nhận data:', data);
+                    // console.table('front-end nhận data:', data);
                     table.rows[0].cells[0].textContent = "Tên côn trùng:";//
                     table.rows[0].cells[1].textContent = data.ten;
                     table.rows[1].cells[0].textContent = "Đặc Điểm:";//
@@ -127,7 +133,7 @@ function draw_image_and_boxes(file, boxes) {
                     table.rows[4].cells[0].textContent = "Cách phòng Ngừa:";//
                     table.rows[4].cells[1].textContent = data.BP_phong_ngua;
 
-
+                    // xuống dòng 
                     table.rows[0].cells[1].style.whiteSpace = 'pre-line';
                     table.rows[1].cells[1].style.whiteSpace = 'pre-line';
                     table.rows[2].cells[1].style.whiteSpace = 'pre-line';
@@ -205,6 +211,7 @@ async function run_model(input) {
     const model = await ort.InferenceSession.create("last.onnx");
     input = new ort.Tensor(Float32Array.from(input), [1, 3, 640, 640]);
     const outputs = await model.run({ images: input });
+    console.log(outputs);
     //   console.log(outputs["output0"].data);
     return outputs["output0"].data;
 }
@@ -236,7 +243,7 @@ function process_output(output, img_width, img_height) {
         const x2 = (xc + w / 2) / 640 * img_width;
         const y2 = (yc + h / 2) / 640 * img_height;
         boxes.push([x1, y1, x2, y2, label, prob]);
-
+        
     }
 
     boxes = boxes.sort((box1, box2) => box2[5] - box1[5])
