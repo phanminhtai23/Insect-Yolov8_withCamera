@@ -47,10 +47,12 @@ function webcamStop() {
     count++;
 }
 // asyn
-function loop() {
+async function loop() {
     if (count > 0) return;
     webcam.update(); // update the webcam frame
-    predict(); // await
+    console.time("time render frame");
+    await predict(); // await
+    console.timeEnd("time render frame");
 
     window.requestAnimationFrame(loop);
 }
@@ -66,17 +68,28 @@ async function predict() {
     // Chuyển đổi nội dung của canvas thành một URL dữ liệu
     const dataURL = canvas1.toDataURL();
     // console.log(dataURL);
-    const data1 = JSON.stringify({ dataURL: dataURL });
+
+    const [input, img_width, img_height] = await prepare_input(dataURL);
+
+    const data1 = JSON.stringify({
+        input: input,
+        img_width: img_width,
+        img_height: img_height
+    });
     // console.log(data1);
-    const nameClass = getNameClass(data1);
-    webcamStop();
-    // labelContainer.childNodes[0].innerHTML = nameClass;
+
+
+    // await getNameClass(data1);
+
+    const nameClass = await getNameClass(data1);
+    labelContainer.childNodes[0].innerHTML = nameClass.name + ': ' + nameClass.prob;
+
 
 }
 
-function getNameClass(data1) {
+async function getNameClass(data1) {
     // console.log("data gửi", data1);
-    fetch('/api/name', {
+    return fetch('/api/name', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -89,13 +102,52 @@ function getNameClass(data1) {
             }
             return response.json(); // Trả về chuỗi kết quả từ server
         })
-        .then(data => {
-            console.log('Response from server:', data); // Xử lý dữ liệu trả về từ server
+        .then(data => { // Xử lý dữ liệu trả về từ server
+            return data;
+            // labelContainer.childNodes[0].innerHTML = data.name + ': ' + data.prob;
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
 }
+
+// const fetch = require('node-fetch');
+
+// Hàm gọi API và trả về một Promise
+// async function getNameClass(data1) {
+//     const apiUrl = '/api/name'; // Địa chỉ URL của API
+//     try {
+//       const response = await fetch(apiUrl, {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//         body: data1,
+//       });
+
+//       if (!response.ok) {
+//         throw new Error('Network response was not ok');
+//       }
+
+//       const data = await response.json(); // Chuyển đổi dữ liệu JSON từ phản hồi
+//       console.log('Response from server:', data);
+//       console.log("data.name: ", data.name);
+//       return data.name; // Trả về dữ liệu từ máy chủ
+//     } catch (error) {
+//       console.error('There was a problem with the fetch operation:', error);
+//       throw error;
+//     }
+//   }
+
+// Sử dụng hàm getNameClass để gọi API và nhận kết quả
+//   getNameClass()
+//     .then(name => {
+//       console.log('Name from server:', name); // Xử lý dữ liệu trả về từ máy chủ
+//     })
+//     .catch(error => {
+//       console.error(error); // Xử lý lỗi nếu có
+//     });
+
 
 
 // * @param boxes Array of bounding boxes in format [[x1,y1,x2,y2,object_type,probability],...]

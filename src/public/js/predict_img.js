@@ -49,6 +49,7 @@ function draw_image_and_boxes(file, boxes) {
     var canvas1 = container.querySelector("canvas");
     if (canvas1) {
         canvas1.remove();
+        console.log("xóa canvas ok");
     }
     // nếu có ô label của camera thì xóa nó
     labelContainer1 = document.getElementById("label-container");
