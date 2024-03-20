@@ -1,3 +1,9 @@
+// async function myModel() {
+//     const model = await ort.InferenceSession.create("last.onnx");
+//     // console.log(model);
+//     console.log("load model ok");
+//     return model;
+// }
 
 function downloadImage(imageUrl) {
     var link = document.createElement('a');
@@ -10,7 +16,12 @@ function downloadImage(imageUrl) {
 
 const input = document.getElementById("uploadInput");
 input.addEventListener("change", async (event) => {
-    const boxes = await detect_objects_on_image(event.target.files[0]);
+    const dataurl = URL.createObjectURL(event.target.files[0])
+
+    console.time('Time predicted img:');
+    const boxes = await detect_objects_on_image(dataurl);
+    console.timeEnd('Time predicted img:');
+
     draw_image_and_boxes(event.target.files[0], boxes);
 })
 
@@ -27,31 +38,28 @@ input.addEventListener("change", async (event) => {
 function draw_image_and_boxes(file, boxes) {
     const img = new Image()
     img.src = URL.createObjectURL(file);
+    // nếu bảng in4 đang có thông tin => remove bảng
+    var infor = document.getElementById("infor");
+    var table1 = infor.querySelector("table");
+    if (table1) {
+        table1.remove();
+    }
+    // Nếu tồn tại phần tử canvas của ô camera, thì xóa nó
+    var container = document.getElementById("webcam-container");
+    var canvas1 = container.querySelector("canvas");
+    if (canvas1) {
+        canvas1.remove();
+    }
+    // nếu có ô label của camera thì xóa nó
+    labelContainer1 = document.getElementById("label-container");
+    if (labelContainer1) {
+        labelContainer1.remove();
+    }
+    // tạo thẻ canvas để hiển thị ảnh
+    var container = document.getElementById("webcam-container");
+    var square = document.createElement("canvas");
+    container.appendChild(square);
     img.onload = () => {
-        // nếu bảng in4 đang có thông tin => remove bảng
-        var infor = document.getElementById("infor");
-        var table1 = infor.querySelector("table");
-        if (table1) {
-            table1.remove();
-        }
-
-        var container = document.getElementById("webcam-container");
-        var canvas1 = container.querySelector("canvas");
-        // Nếu tồn tại phần tử canvas của ô camera, thì xóa nó
-        if (canvas1) {
-            // console.log("xóa canvas ok");
-            canvas1.remove();
-        }
-        // nếu có ô label của camera thì xóa nó
-        labelContainer1 = document.getElementById("label-container");
-        if (labelContainer1) {
-            labelContainer1.remove();
-        }
-        // tạo thẻ canvas để hiển thị ảnh
-        var container = document.getElementById("webcam-container");
-        var square = document.createElement("canvas");
-        container.appendChild(square);
-
         const canvas = document.querySelector("canvas");
         canvas.width = img.width;
         canvas.height = img.height;
@@ -68,94 +76,86 @@ function draw_image_and_boxes(file, boxes) {
             ctx.fillStyle = "#000000";
             ctx.fillText(label + ' ' + prob.toFixed(2), x1, y1 + 18);
         });
-        // tạo bảng hiển thị in4
-        var infor = document.getElementById("infor");
-        var table = document.createElement("table");
-        table.style.width = "100%";
-        table.style.height = "100%";
-
-        // console.log("boxes   = ", boxes);
-        // nếu có phát hiện
-        if (boxes.length > 0) {
-            var max = 0, max_index = -1;
-            for (var i = 0; i < boxes.length; i++) {
-                if (boxes[i][5] > max) {
-                    max = boxes[i][5];
-                    max_index = i;
-                }
-            }
-
-            table.setAttribute("class", "table");
-            // Tạo hàng và cột cho bảng
-            for (var i = 0; i < 5; i++) {
-                var row = table.insertRow();
-                for (var j = 0; j < 2; j++) {
-                    var cell = row.insertCell();
-                }
-            }
-
-            // lấy id
-            var id1;
-            if (boxes[max_index][4] == 'Sâu đục thân') {
-                id1 = 0;
-            } else if (boxes[max_index][4] == 'Bọ xít đen') {
-                id1 = 1;
-            } else if (boxes[max_index][4] == 'Bù lạch') {
-                id1 = 2;
-            } else if (boxes[max_index][4] == 'Dế nhũi') {
-                id1 = 3;
-            } else if (boxes[max_index][4] == 'Rầy lưng xanh') {
-                id1 = 4;
-            } else if (boxes[max_index][4] == 'Rầy nâu') {
-                id1 = 5;
-            } else if (boxes[max_index][4] == 'Sâu cuốn lá') {
-                id1 = 6;
-            }
-
-            // call API lấy dữ liệu
-            fetch(`/api/users/${id1}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    // console.table('front-end nhận data:', data);
-                    table.rows[0].cells[0].textContent = "Tên côn trùng:";//
-                    table.rows[0].cells[1].textContent = data.ten;
-                    table.rows[1].cells[0].textContent = "Đặc Điểm:";//
-                    table.rows[1].cells[1].textContent = data.dac_diem;
-                    table.rows[2].cells[0].textContent = "Tác Hại:";//
-                    table.rows[2].cells[1].textContent = data.tac_hai;
-                    table.rows[3].cells[0].textContent = "Cách Điều Trị:";//
-                    table.rows[3].cells[1].textContent = data.cach_dieu_tri;
-                    table.rows[4].cells[0].textContent = "Cách phòng Ngừa:";//
-                    table.rows[4].cells[1].textContent = data.BP_phong_ngua;
-
-                    // xuống dòng 
-                    table.rows[0].cells[1].style.whiteSpace = 'pre-line';
-                    table.rows[1].cells[1].style.whiteSpace = 'pre-line';
-                    table.rows[2].cells[1].style.whiteSpace = 'pre-line';
-                    table.rows[3].cells[1].style.whiteSpace = 'pre-line';
-                    table.rows[4].cells[1].style.whiteSpace = 'pre-line';
-                })
-                .catch(error => {
-                    console.error('There was a problem with your fetch operation:', error);
-                });
-            // console.log("ok");
-
-        } else {  // không phát hiện côn trùng nào có prob >=0.6
-            table.setAttribute("class", "table1");
-            // console.log("Hệ thống không phát hiện côn trùng !");
-            var row = table.insertRow();
-            row.textContent = "Hệ thống không phát hiện côn trùng nào cả !";
-        }
-        // Thêm bảng vào trang
-        infor.appendChild(table);
     }
+    // tạo bảng hiển thị in4
+    var infor = document.getElementById("infor");
+    var table = document.createElement("table");
+    table.style.width = "100%";
+    table.style.height = "100%";
+
+    // console.log("boxes   = ", boxes);
+    // nếu có phát hiện
+    if (boxes.length > 0) {
+        table.setAttribute("class", "table");
+        // Tạo hàng và cột cho bảng
+        for (var i = 0; i < 5; i++) {
+            var row = table.insertRow();
+            for (var j = 0; j < 2; j++) {
+                var cell = row.insertCell();
+            }
+        }
+
+        // lấy id
+        var id1;
+        if (boxes[0][4] == 'Sâu đục thân') {
+            id1 = 0;
+        } else if (boxes[0][4] == 'Bọ xít đen') {
+            id1 = 1;
+        } else if (boxes[0][4] == 'Bù lạch') {
+            id1 = 2;
+        } else if (boxes[0][4] == 'Dế nhũi') {
+            id1 = 3;
+        } else if (boxes[0][4] == 'Rầy lưng xanh') {
+            id1 = 4;
+        } else if (boxes[0][4] == 'Rầy nâu') {
+            id1 = 5;
+        } else if (boxes[0][4] == 'Sâu cuốn lá') {
+            id1 = 6;
+        }
+
+        // call API lấy dữ liệu
+        fetch(`/api/information/${id1}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // console.table('front-end nhận data:', data);
+                table.rows[0].cells[0].textContent = "Tên côn trùng:";//
+                table.rows[0].cells[1].textContent = data.ten;
+                table.rows[1].cells[0].textContent = "Đặc Điểm:";//
+                table.rows[1].cells[1].textContent = data.dac_diem;
+                table.rows[2].cells[0].textContent = "Tác Hại:";//
+                table.rows[2].cells[1].textContent = data.tac_hai;
+                table.rows[3].cells[0].textContent = "Cách Điều Trị:";//
+                table.rows[3].cells[1].textContent = data.cach_dieu_tri;
+                table.rows[4].cells[0].textContent = "Cách phòng Ngừa:";//
+                table.rows[4].cells[1].textContent = data.BP_phong_ngua;
+
+                // xuống dòng
+                table.rows[0].cells[1].style.whiteSpace = 'pre-line';
+                table.rows[1].cells[1].style.whiteSpace = 'pre-line';
+                table.rows[2].cells[1].style.whiteSpace = 'pre-line';
+                table.rows[3].cells[1].style.whiteSpace = 'pre-line';
+                table.rows[4].cells[1].style.whiteSpace = 'pre-line';
+            })
+            .catch(error => {
+                console.error('There was a problem with your fetch operation:', error);
+            });
+        // console.log("ok");
+
+    } else {  // không phát hiện côn trùng nào có prob >=0.6
+        table.setAttribute("class", "table1");
+        // console.log("Hệ thống không phát hiện côn trùng !");
+        var row = table.insertRow();
+        row.textContent = "Hệ thống không phát hiện côn trùng nào cả !";
+    }
+    infor.appendChild(table);
 
 }
+
 
 /**
  * Function receives an image, passes it through YOLOv8 neural network
@@ -177,9 +177,11 @@ async function detect_objects_on_image(buf) {
  * @returns Array of pixels
  */
 async function prepare_input(buf) {
+
     return new Promise(resolve => {
+        // console.time('time prepare input');
         const img = new Image();
-        img.src = URL.createObjectURL(buf);
+        img.src = buf;
         img.onload = () => {
             const [img_width, img_height] = [img.width, img.height]
             const canvas = document.createElement("canvas");
@@ -198,7 +200,9 @@ async function prepare_input(buf) {
             }
             const input = [...red, ...green, ...blue];
             resolve([input, img_width, img_height])
+            // console.timeEnd('time prepare input');
         }
+
     })
 }
 
@@ -208,11 +212,14 @@ async function prepare_input(buf) {
  * @returns Raw output of neural network as a flat array of numbers
  */
 async function run_model(input) {
+
+    // console.time('time run model:');
     const model = await ort.InferenceSession.create("last.onnx");
     input = new ort.Tensor(Float32Array.from(input), [1, 3, 640, 640]);
     const outputs = await model.run({ images: input });
-    console.log(outputs);
-    //   console.log(outputs["output0"].data);
+    // console.timeEnd('time run model:');
+    // console.log("output: ", outputs);
+
     return outputs["output0"].data;
 }
 
@@ -225,12 +232,13 @@ async function run_model(input) {
  * @returns Array of detected objects in a format [[x1,y1,x2,y2,object_type,probability],..]
  */
 function process_output(output, img_width, img_height) {
+    // console.time('time process output:');
     let boxes = [];
     for (let index = 0; index < 8400; index++) {
-        const [class_id, prob] = [...Array(80).keys()]
+        const [class_id, prob] = [...Array(7).keys()]
             .map(col => [col, output[8400 * (col + 4) + index]])
             .reduce((accum, item) => item[1] > accum[1] ? item : accum, [0, 0]);
-        if (prob < 0.6) {
+        if (prob < 0.5) {
             continue;
         }
         const label = yolo_classes[class_id];
@@ -243,7 +251,6 @@ function process_output(output, img_width, img_height) {
         const x2 = (xc + w / 2) / 640 * img_width;
         const y2 = (yc + h / 2) / 640 * img_height;
         boxes.push([x1, y1, x2, y2, label, prob]);
-        
     }
 
     boxes = boxes.sort((box1, box2) => box2[5] - box1[5])
@@ -252,6 +259,7 @@ function process_output(output, img_width, img_height) {
         result.push(boxes[0]);
         boxes = boxes.filter(box => iou(boxes[0], box) < 0.7);
     }
+    // console.timeEnd('time process output:');
     return result;
 }
 

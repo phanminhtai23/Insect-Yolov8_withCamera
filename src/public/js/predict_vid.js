@@ -1,28 +1,15 @@
-const URL_cam = "./my_model/";
 
-let model, webcam, labelContainer, maxPredictions;
-
+let webcam, labelContainer, model1, count;
 // Load the image model and setup the webcam
 async function init() {
-    const modelURL = URL_cam + "model.json";
-    const metadataURL = URL_cam + "metadata.json";
+    count = 0; // biến điếm dừng camera
 
-    // load the model and metadata
-    // Refer to tmImage.loadFromFiles() in the API to support files from a file picker
-    // or files from your local hard drive
-    // Note: the pose library adds "tmImage" object to your window (window.tmImage)
-    model = await tmImage.load(modelURL, metadataURL);
-    maxPredictions = model.getTotalClasses();
+    model1 = await ort.InferenceSession.create("../last.onnx");
 
     // Convenience function to setup a webcam
     const flip = false; // whether to flip the webcam
     webcam = new tmImage.Webcam(640, 640, flip); // width, height, flip
     await webcam.setup({ facingMode: "environment" }); // request access to the webcam
-    // await webcam.setup({ deviceId: devices[2].deviceId });
-    // await webcam.setup(); // request access to the webcam
-
-    const devices = await navigator.mediaDevices.enumerateDevices()
-    console.log(devices);
 
     await webcam.play();
     window.requestAnimationFrame(loop);
@@ -41,12 +28,13 @@ async function init() {
         element.style.color = "red";
     }
 
-
-
     // xóa thẻ canvas nếu có
+    var table1 = infor.querySelector("table");
+    if (table1) {
+        table1.remove();
+    }
     var container = document.getElementById("webcam-container");
     var canvas = container.querySelector("canvas");
-
     if (canvas) {
         // Nếu tồn tại phần tử canvas, thì xóa nó
         canvas.remove();
@@ -55,16 +43,16 @@ async function init() {
     // append elements to the DOM
     document.getElementById("webcam-container").appendChild(webcam.canvas);
     labelContainer = document.getElementById("label-container");
-    for (let i = 0; i < maxPredictions; i++) { // and class labels
-        labelContainer.appendChild(document.createElement("div"));
-    }
+    labelContainer.appendChild(document.createElement("div"));
 }
 
 async function webcamStop() {
     webcam.stop();
+    count++;
 }
 
 async function loop() {
+    if (count > 0) return;
     webcam.update(); // update the webcam frame
     await predict();
     window.requestAnimationFrame(loop);
@@ -72,17 +60,26 @@ async function loop() {
 
 // run the webcam image through the image model
 async function predict() {
-    // predict can take in an image, video or canvas html element
-    const prediction = await model.predict(webcam.canvas);
-    var max_pro = -1;
-    var index = -1;
-    for (let i = 0; i < maxPredictions; i++) {
-        if (prediction[i].probability > max_pro) {
-            index = i;
-            max_pro = prediction[i].probability.toFixed(2);
-        }
+
+    // lấy fram ảnh để predict
+    const canvas1 = document.createElement('canvas');
+    const ctx = canvas1.getContext('2d');
+    // Vẽ frame ảnh từ webcam lên canvas
+    ctx.drawImage(webcam.canvas, 0, 0, canvas1.width, canvas1.height);
+    // Chuyển đổi nội dung của canvas thành một URL dữ liệu
+    const dataURL = canvas1.toDataURL();
+    console.time('thời gian/ khung ảnh');
+    const boxes = await detect_objects_on_image(dataURL);
+    render_prob(boxes);
+}
+// * @param boxes Array of bounding boxes in format [[x1,y1,x2,y2,object_type,probability],...]
+function render_prob(boxes) {
+    if (boxes.length > 0) {
+        const classPrediction = boxes[0][4] + ": " + boxes[0][5].toFixed(2);
+        labelContainer.childNodes[0].innerHTML = classPrediction;
+        console.timeEnd('thời gian/ khung ảnh');
+    } else {
+        labelContainer.childNodes[0].innerHTML = "Unknow"
+        console.timeEnd('thời gian/ khung ảnh');
     }
-    const classPrediction =
-        prediction[index].className + ": " + max_pro;
-    labelContainer.childNodes[0].innerHTML = classPrediction;
 }
