@@ -34,7 +34,7 @@ app.get('/api/information/:id', (req, res) => {
         const user = users.find(user => user.id === userId);
         if (user) {
             res.json(user);
-            console.log("sever tra data", user);
+            // console.log("sever tra data", user);
         } else {
             res.status(404).json({ message: 'User not found' });
         }
@@ -44,6 +44,7 @@ app.get('/api/information/:id', (req, res) => {
 
 // predic img
 app.post('/api/name', async (req, res) => {
+    console.log("Sever đang predicting!");
     // console.time("time sever");
     const { input, img_width, img_height } = req.body;
     
@@ -53,6 +54,7 @@ app.post('/api/name', async (req, res) => {
     
     // Trả về kết quả phân tích hình ảnh dưới dạng JSON
     if (boxes.length > 0) {
+        console.log("Sever predicting xong!");
         // console.timeEnd("time sever");
         res.json({
             name: boxes[0][4],

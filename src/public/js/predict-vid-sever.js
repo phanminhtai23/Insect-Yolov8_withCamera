@@ -25,6 +25,7 @@ async function init() {
         // Thiết lập kích thước chữ và màu chữ
         element.style.fontSize = "20px";
         element.style.color = "red";
+        element.style.fontWeight = "600";
     }
 
     // xóa thẻ canvas nếu có
@@ -49,8 +50,8 @@ function webcamStop() {
 // asyn
 async function loop() {
     if (count > 0) return;
-    webcam.update(); // update the webcam frame
     console.time("time render frame");
+    webcam.update(); // update the webcam frame
     await predict(); // await
     console.timeEnd("time render frame");
 
@@ -69,6 +70,7 @@ async function predict() {
     const dataURL = canvas1.toDataURL();
     // console.log(dataURL);
 
+
     const [input, img_width, img_height] = await prepare_input(dataURL);
 
     const data1 = JSON.stringify({
@@ -78,8 +80,6 @@ async function predict() {
     });
     // console.log(data1);
 
-
-    // await getNameClass(data1);
 
     const nameClass = await getNameClass(data1);
     labelContainer.childNodes[0].innerHTML = nameClass.name + ': ' + nameClass.prob;
@@ -109,55 +109,4 @@ async function getNameClass(data1) {
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
-}
-
-// const fetch = require('node-fetch');
-
-// Hàm gọi API và trả về một Promise
-// async function getNameClass(data1) {
-//     const apiUrl = '/api/name'; // Địa chỉ URL của API
-//     try {
-//       const response = await fetch(apiUrl, {
-//         method: 'POST',
-//         headers: {
-//           'Content-Type': 'application/json',
-//         },
-//         body: data1,
-//       });
-
-//       if (!response.ok) {
-//         throw new Error('Network response was not ok');
-//       }
-
-//       const data = await response.json(); // Chuyển đổi dữ liệu JSON từ phản hồi
-//       console.log('Response from server:', data);
-//       console.log("data.name: ", data.name);
-//       return data.name; // Trả về dữ liệu từ máy chủ
-//     } catch (error) {
-//       console.error('There was a problem with the fetch operation:', error);
-//       throw error;
-//     }
-//   }
-
-// Sử dụng hàm getNameClass để gọi API và nhận kết quả
-//   getNameClass()
-//     .then(name => {
-//       console.log('Name from server:', name); // Xử lý dữ liệu trả về từ máy chủ
-//     })
-//     .catch(error => {
-//       console.error(error); // Xử lý lỗi nếu có
-//     });
-
-
-
-// * @param boxes Array of bounding boxes in format [[x1,y1,x2,y2,object_type,probability],...]
-function render_prob(boxes) {
-    if (boxes.length > 0) {
-        const classPrediction = boxes[0][4] + ": " + boxes[0][5].toFixed(2);
-        labelContainer.childNodes[0].innerHTML = classPrediction;
-        console.timeEnd('thời gian/ khung ảnh');
-    } else {
-        labelContainer.childNodes[0].innerHTML = "Unknow"
-        console.timeEnd('thời gian/ khung ảnh');
-    }
 }

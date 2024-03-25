@@ -26,9 +26,10 @@ async function init() {
         // Thiết lập kích thước chữ và màu chữ
         element.style.fontSize = "20px";
         element.style.color = "red";
+        element.style.fontWeight = "600";
     }
 
-    // xóa thẻ canvas nếu có
+    // xóa thẻ table nếu có
     var table1 = infor.querySelector("table");
     if (table1) {
         table1.remove();

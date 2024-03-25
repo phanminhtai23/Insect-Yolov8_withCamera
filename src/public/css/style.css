@@ -208,9 +208,22 @@ canvas {
     transition: background-color 0.3s ease;
 }
 
+#infor {
+    position: relative;
+}
+
+.table2 {
+    position: absolute; /* Đặt vị trí của phần tử con */
+    top: 0;
+    left: 0;
+    display: none;
+}
+
 .table {
     border-collapse: collapse;
 }
+
+
 
 /* cột đầu */
 .table tr td:first-child {
