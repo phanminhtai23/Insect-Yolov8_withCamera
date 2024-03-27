@@ -30,21 +30,35 @@ async function init() {
     }
 
     // xóa thẻ table nếu có
-    var table1 = infor.querySelector("table");
+    var infor1 = document.getElementById("infor");
+    var table1 = infor1.querySelector("table");
     if (table1) {
         table1.remove();
     }
+    // set bảng hiện thị thông tin
+    infor_vid = document.getElementById("infor");
+    table_vid = document.createElement("table");
+    table_vid.style.width = "100%";
+    table_vid.style.height = "100%";
+
+    table_vid.setAttribute("class", "table");
+    for (var i = 0; i < 5; i++) {
+        var row = table_vid.insertRow();
+        for (var j = 0; j < 2; j++) {
+            var cell = row.insertCell();
+        }
+    }
+
     var container = document.getElementById("webcam-container");
     var canvas = container.querySelector("canvas");
-    if (canvas) {
-        // Nếu tồn tại phần tử canvas, thì xóa nó
+    if (canvas) { // xóa thẻ canvas hiển thị ảnh
         canvas.remove();
-        console.log("xóa canvas ok");
     }
     // append elements to the DOM
     document.getElementById("webcam-container").appendChild(webcam.canvas);
     labelContainer = document.getElementById("label-container");
-    labelContainer.appendChild(document.createElement("div"));
+    labelContainer.appendChild(document.createElement("div")); // hiển thị class name
+    labelContainer.appendChild(document.createElement("div")); // thẻ hiện thị FPS
 }
 
 async function webcamStop() {
@@ -54,8 +68,17 @@ async function webcamStop() {
 
 async function loop() {
     if (count > 0) return;
+
+    var startTime = new Date();
+
     webcam.update(); // update the webcam frame
     await predict();
+
+    var endTime = new Date();
+    var executionTime = endTime - startTime;
+    let FPS = (1000 / executionTime).toFixed(2);
+    labelContainer.childNodes[1].innerHTML = "FPS: " + FPS;
+
     window.requestAnimationFrame(loop);
 }
 
@@ -71,16 +94,79 @@ async function predict() {
     const dataURL = canvas1.toDataURL();
     console.time('thời gian/ khung ảnh');
     const boxes = await detect_objects_on_image(dataURL);
-    render_prob(boxes);
+    await render_prob(boxes);
 }
 // * @param boxes Array of bounding boxes in format [[x1,y1,x2,y2,object_type,probability],...]
-function render_prob(boxes) {
+async function render_prob(boxes) {
     if (boxes.length > 0) {
+        table_vid.setAttribute("class", "table");
+
         const classPrediction = boxes[0][4] + ": " + boxes[0][5].toFixed(2);
         labelContainer.childNodes[0].innerHTML = classPrediction;
         console.timeEnd('thời gian/ khung ảnh');
+
+        var idClassName;
+        if (boxes[0][4] == 'Sâu đục thân') {
+            idClassName = 0;
+        } else if (boxes[0][4] == 'Bọ xít đen') {
+            idClassName = 1;
+        } else if (boxes[0][4] == 'Bù lạch') {
+            idClassName = 2;
+        } else if (boxes[0][4] == 'Dế nhũi') {
+            idClassName = 3;
+        } else if (boxes[0][4] == 'Rầy lưng xanh') {
+            idClassName = 4;
+        } else if (boxes[0][4] == 'Rầy nâu') {
+            idClassName = 5;
+        } else if (boxes[0][4] == 'Sâu cuốn lá') {
+            idClassName = 6;
+        }
+
+        var inforClass = await callAPI(idClassName)
+
+        table_vid.rows[0].cells[0].textContent = "Tên côn trùng:";//
+        table_vid.rows[0].cells[1].textContent = inforClass.ten;
+        table_vid.rows[1].cells[0].textContent = "Đặc Điểm:";//
+        table_vid.rows[1].cells[1].textContent = inforClass.dac_diem;
+        table_vid.rows[2].cells[0].textContent = "Tác Hại:";//
+        table_vid.rows[2].cells[1].textContent = inforClass.tac_hai;
+        table_vid.rows[3].cells[0].textContent = "Cách Điều Trị:";//
+        table_vid.rows[3].cells[1].textContent = inforClass.cach_dieu_tri;
+        table_vid.rows[4].cells[0].textContent = "Cách phòng Ngừa:";//
+        table_vid.rows[4].cells[1].textContent = inforClass.BP_phong_ngua;
+
+        // xuống dòng
+        table_vid.rows[0].cells[1].style.whiteSpace = 'pre-line';
+        table_vid.rows[1].cells[1].style.whiteSpace = 'pre-line';
+        table_vid.rows[2].cells[1].style.whiteSpace = 'pre-line';
+        table_vid.rows[3].cells[1].style.whiteSpace = 'pre-line';
+        table_vid.rows[4].cells[1].style.whiteSpace = 'pre-line';
+
+        infor_vid.appendChild(table_vid);
+
     } else {
         labelContainer.childNodes[0].innerHTML = "Unknow"
         console.timeEnd('thời gian/ khung ảnh');
+
+        table_vid.setAttribute("class", "table2");
     }
+}
+
+async function callAPI(id) {
+    // call api
+    return fetch(`/api/information/${id}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            // console.table('front-end nhận data:', data);
+            return data
+
+        })
+        .catch(error => {
+            console.error('There was a problem with your fetch operation:', error);
+        });
 }

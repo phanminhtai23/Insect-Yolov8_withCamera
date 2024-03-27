@@ -29,12 +29,12 @@ app.get('/api/information/:id', (req, res) => {
             console.error('Error reading file:', err);
             return;
         }
-        const users = JSON.parse(data);
-        const userId = parseInt(req.params.id);
-        const user = users.find(user => user.id === userId);
-        if (user) {
-            res.json(user);
-            // console.log("sever tra data", user);
+        const informations = JSON.parse(data); // total in4
+        const idClassName = parseInt(req.params.id); // id class name
+        const inforClass = informations.find(inforClass => inforClass.id === idClassName);
+        if (inforClass) {
+            res.json(inforClass);
+            // console.log("sever tra data", inforClass);
         } else {
             res.status(404).json({ message: 'User not found' });
         }
@@ -44,30 +44,41 @@ app.get('/api/information/:id', (req, res) => {
 
 // predic img
 app.post('/api/name', async (req, res) => {
-    console.log("Sever đang predicting!");
+    // console.log("Sever đang predicting!");
     // console.time("time sever");
     const { input, img_width, img_height } = req.body;
-    
+
     const boxes = await detect_objects_on_image(input, img_width, img_height);
-    // console.log("boxes: ", boxes.length);
-    // draw_image_and_boxes(urlBase64, boxes);
-    
+
     // Trả về kết quả phân tích hình ảnh dưới dạng JSON
     if (boxes.length > 0) {
-        console.log("Sever predicting xong!");
         // console.timeEnd("time sever");
-        res.json({
-            name: boxes[0][4],
-            prob: boxes[0][5].toFixed(2)
+
+        fs.readFile('C:/Users/MINH TAI/Desktop/Nhận dạng côn trùng hại lúa/code/tensorflow/sever1/src/public/data/data.json', 'utf8', (err, data) => {
+            if (err) {
+                console.error('Error reading file:', err);
+                return;
+            }
+            const informations = JSON.parse(data); // total in4 // id class name
+            const inforClass = informations.find(inforClass => inforClass.ten === boxes[0][4]);
+            // console.log("box", boxes[0][4]);
+            // console.log("inforclass", inforClass);
+            res.json({
+                name: boxes[0][4],
+                prob: boxes[0][5].toFixed(2),
+                infor: inforClass
+            });
         });
+
     } else {
         // console.timeEnd("time sever");
         res.json({
             name: "unknow",
-            prob: ""
+            prob: "",
+            infor: ""
         });
     }
-    
+
 });
 
 app.listen(port, hostname, () => {
@@ -108,7 +119,7 @@ async function detect_objects_on_image(input, img_width, img_height) {
 
 
 async function run_model(input) {
-    
+
     const model = await onnx.InferenceSession.create("C:/Users/MINH TAI/Desktop/Nhận dạng côn trùng hại lúa/code/tensorflow/sever1/src/public/last.onnx");
     input = new onnx.Tensor(Float32Array.from(input), [1, 3, 640, 640]);
     const outputs = await model.run({ images: input });

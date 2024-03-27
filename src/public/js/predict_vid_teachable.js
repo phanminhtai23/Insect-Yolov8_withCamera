@@ -82,12 +82,12 @@ async function loop() {
     webcam.update(); // update the webcam frame
     await predict(); // await
 
+    // tính và hiện thị FPS
     var endTime = new Date();
     var executionTime = endTime - startTime;
     let FPS = (1000 / executionTime).toFixed(0);
     labelContainer.childNodes[1].innerHTML = "FPS: " + FPS;
-    // console.log("FPS: ", FPS);
-
+    
     window.requestAnimationFrame(loop);
 }
 

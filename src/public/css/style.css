@@ -213,7 +213,8 @@ canvas {
 }
 
 .table2 {
-    position: absolute; /* Đặt vị trí của phần tử con */
+    position: absolute;
+    /* Đặt vị trí của phần tử con */
     top: 0;
     left: 0;
     display: none;
@@ -229,10 +230,12 @@ canvas {
 .table tr td:first-child {
     width: 30%;
     text-align: center;
-    font-weight: 800;
+    font-weight: 750;
     padding: 0;
+    font-size: 19px;
 }
 
+/* cot cuoi */
 .table tr td:last-child {
     text-align: left;
     padding: 0 10px 0 10px;
@@ -318,6 +321,11 @@ canvas {
     .table th,
     .table td {
         border: 1px solid black;
+    }
+
+    /* cột đầu */
+    .table tr td:first-child {
+        font-size: 16px;
     }
 
     .table tr td:last-child {

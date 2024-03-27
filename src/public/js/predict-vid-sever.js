@@ -37,10 +37,32 @@ async function init() {
         canvas.remove();
         console.log("xóa canvas ok");
     }
+
+    // xóa thẻ table nếu có
+    var infor1 = document.getElementById("infor");
+    var table1 = infor1.querySelector("table");
+    if (table1) {
+        table1.remove();
+    }
+    // set bảng hiện thị thông tin
+    infor_vid = document.getElementById("infor");
+    table_vid = document.createElement("table");
+    table_vid.style.width = "100%";
+    table_vid.style.height = "100%";
+
+    table_vid.setAttribute("class", "table");
+    for (var i = 0; i < 5; i++) {
+        var row = table_vid.insertRow();
+        for (var j = 0; j < 2; j++) {
+            var cell = row.insertCell();
+        }
+    }
+
     // append elements to the DOM
     document.getElementById("webcam-container").appendChild(webcam.canvas);
     labelContainer = document.getElementById("label-container");
-    labelContainer.appendChild(document.createElement("div"));
+    labelContainer.appendChild(document.createElement("div")); // hiển thị class name
+    labelContainer.appendChild(document.createElement("div")); // thẻ hiện thị FPS
 }
 
 function webcamStop() {
@@ -50,9 +72,19 @@ function webcamStop() {
 // asyn
 async function loop() {
     if (count > 0) return;
+
+    var startTime = new Date();
+
     console.time("time render frame");
+
     webcam.update(); // update the webcam frame
     await predict(); // await
+
+    var endTime = new Date();
+    var executionTime = endTime - startTime;
+    let FPS = (1000 / executionTime).toFixed(2);
+    labelContainer.childNodes[1].innerHTML = "FPS: " + FPS;
+
     console.timeEnd("time render frame");
 
     window.requestAnimationFrame(loop);
@@ -81,9 +113,37 @@ async function predict() {
     // console.log(data1);
 
 
-    const nameClass = await getNameClass(data1);
-    labelContainer.childNodes[0].innerHTML = nameClass.name + ': ' + nameClass.prob;
+    const infor = await getNameClass(data1);
+    labelContainer.childNodes[0].innerHTML = infor.name + ': ' + infor.prob;
 
+    // console.log(("nc", nameClass));
+    if (infor.name != "unknow") {
+        table_vid.setAttribute("class", "table");
+
+
+        table_vid.rows[0].cells[0].textContent = "Tên côn trùng:";//
+        table_vid.rows[0].cells[1].textContent = infor.infor.ten;
+        table_vid.rows[1].cells[0].textContent = "Đặc Điểm:";//
+        table_vid.rows[1].cells[1].textContent = infor.infor.dac_diem;
+        table_vid.rows[2].cells[0].textContent = "Tác Hại:";//
+        table_vid.rows[2].cells[1].textContent = infor.infor.tac_hai;
+        table_vid.rows[3].cells[0].textContent = "Cách Điều Trị:";//
+        table_vid.rows[3].cells[1].textContent = infor.infor.cach_dieu_tri;
+        table_vid.rows[4].cells[0].textContent = "Cách phòng Ngừa:";//
+        table_vid.rows[4].cells[1].textContent = infor.infor.BP_phong_ngua;
+
+        // xuống dòng
+        table_vid.rows[0].cells[1].style.whiteSpace = 'pre-line';
+        table_vid.rows[1].cells[1].style.whiteSpace = 'pre-line';
+        table_vid.rows[2].cells[1].style.whiteSpace = 'pre-line';
+        table_vid.rows[3].cells[1].style.whiteSpace = 'pre-line';
+        table_vid.rows[4].cells[1].style.whiteSpace = 'pre-line';
+
+        infor_vid.appendChild(table_vid);
+    } else {
+
+        table_vid.setAttribute("class", "table2");
+    }
 
 }
 
