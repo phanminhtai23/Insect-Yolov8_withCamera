@@ -185,3 +185,7 @@ function intersection(box1, box2) {
 const yolo_classes =
     ['Sâu đục thân', 'Bọ xít đen', 'Bù lạch',
         'Dế nhũi', 'Rầy lưng xanh', 'Rầy nâu', 'Sâu cuốn lá'];
+
+
+
+
