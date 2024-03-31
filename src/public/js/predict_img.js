@@ -216,10 +216,10 @@ async function run_model(input) {
     // console.time('time run model:');
     const model = await ort.InferenceSession.create("last.onnx");
     input = new ort.Tensor(Float32Array.from(input), [1, 3, 640, 640]);
-    console.log("input", input);
+    // console.log("input", input);
     const outputs = await model.run({ images: input });
     // console.timeEnd('time run model:');
-    console.log("output: ", outputs);
+    // console.log("output: ", outputs);
 
     return outputs["output0"].data;
 }
