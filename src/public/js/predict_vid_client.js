@@ -88,7 +88,7 @@ async function predict() {
     // lấy fram ảnh để predict
     const canvas1 = document.createElement('canvas');
     const ctx = canvas1.getContext('2d');
-    // Vẽ frame ảnh từ webcam lên canvas
+    // Vẽ frame ảnh từ webcam lên canvas1
     ctx.drawImage(webcam.canvas, 0, 0, canvas1.width, canvas1.height);
     // Chuyển đổi nội dung của canvas thành một URL dữ liệu
     const dataURL = canvas1.toDataURL();
