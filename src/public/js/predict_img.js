@@ -125,13 +125,13 @@ function draw_image_and_boxes(file, boxes) {
                 // console.table('front-end nhận data:', data);
                 table.rows[0].cells[0].textContent = "Tên côn trùng:";//
                 table.rows[0].cells[1].textContent = data.ten;
-                table.rows[1].cells[0].textContent = "Đặc Điểm:";//
+                table.rows[1].cells[0].textContent = "Đặc điểm:";//
                 table.rows[1].cells[1].textContent = data.dac_diem;
-                table.rows[2].cells[0].textContent = "Tác Hại:";//
+                table.rows[2].cells[0].textContent = "Tác hại:";//
                 table.rows[2].cells[1].textContent = data.tac_hai;
-                table.rows[3].cells[0].textContent = "Cách Điều Trị:";//
+                table.rows[3].cells[0].textContent = "Cách điều trị:";//
                 table.rows[3].cells[1].textContent = data.cach_dieu_tri;
-                table.rows[4].cells[0].textContent = "Cách phòng Ngừa:";//
+                table.rows[4].cells[0].textContent = "Cách phòng ngừa:";//
                 table.rows[4].cells[1].textContent = data.BP_phong_ngua;
 
                 // xuống dòng
