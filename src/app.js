@@ -12,9 +12,6 @@ const onnx = require('onnxruntime-node');
 app.use(cors());
 app.use(express.static(path.join(__dirname, '../src/public')))
 
-// app.use(bodyParser.urlencoded({ extended: true }));
-// app.use(bodyParser.json());
-
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
@@ -61,8 +58,6 @@ app.post('/api/name', async (req, res) => {
             }
             const informations = JSON.parse(data); // total in4 // id class name
             const inforClass = informations.find(inforClass => inforClass.ten === boxes[0][4]);
-            // console.log("box", boxes[0][4]);
-            // console.log("inforclass", inforClass);
             res.json({
                 name: boxes[0][4],
                 prob: boxes[0][5].toFixed(2),
@@ -179,9 +174,6 @@ function intersection(box1, box2) {
     return (x2 - x1) * (y2 - y1)
 }
 
-/**
- * Array of YOLOv8 class labels
- */
 const yolo_classes =
     ['Sâu đục thân', 'Bọ xít đen', 'Bù lạch',
         'Dế nhũi', 'Rầy lưng xanh', 'Rầy nâu', 'Sâu cuốn lá'];
