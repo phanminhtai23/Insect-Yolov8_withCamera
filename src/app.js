@@ -53,7 +53,7 @@ app.post('/api/name', async (req, res) => {
 
         fs.readFile('C:/Users/MINH TAI/Desktop/Nhận dạng côn trùng hại lúa/code/deploy/sever1/src/public/data/data.json', 'utf8', (err, data) => {
             if (err) {
-                console.error('Error reading file:', err);
+                console.error('Lỗi đọc file!!!', err);
                 return;
             }
             const informations = JSON.parse(data); // total in4 // id class name
