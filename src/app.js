@@ -26,7 +26,7 @@ app.get('/api/information/:id', (req, res) => {
             console.error('Error reading file:', err);
             return;
         }
-        const informations = JSON.parse(data); // total in4
+        const informations = JSON.parse(data); // total infor
         const idClassName = parseInt(req.params.id); // id class name
         const inforClass = informations.find(inforClass => inforClass.id === idClassName);
         if (inforClass) {
