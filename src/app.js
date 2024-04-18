@@ -19,7 +19,7 @@ app.get('/', (req, res) => {
     res.send("index.html");
 });
 
-// Route để lấy thông tin người dùng theo ID
+// Route để lấy thông tin côn trùng ID
 app.get('/api/information/:id', (req, res) => {
     fs.readFile('C:/Users/MINH TAI/Desktop/Nhận dạng côn trùng hại lúa/code/deploy/sever1/src/public/data/data.json', 'utf8', (err, data) => {
         if (err) {
@@ -33,7 +33,7 @@ app.get('/api/information/:id', (req, res) => {
             res.json(inforClass);
             // console.log("sever tra data", inforClass);
         } else {
-            res.status(404).json({ message: 'User not found' });
+            res.status(404).json({ message: 'Không tìm thấy dữ liệu' });
         }
     });
 });
