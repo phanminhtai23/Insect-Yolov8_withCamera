@@ -78,6 +78,7 @@ async function loop() {
     var executionTime = endTime - startTime;
     let FPS = (1000 / executionTime).toFixed(2);
     labelContainer.childNodes[1].innerHTML = "FPS: " + FPS;
+    console.log("FPS: ", FPS);
 
     window.requestAnimationFrame(loop);
 }
@@ -92,7 +93,7 @@ async function predict() {
     ctx.drawImage(webcam.canvas, 0, 0, canvas1.width, canvas1.height);
     // Chuyển đổi nội dung của canvas thành một URL dữ liệu
     const dataURL = canvas1.toDataURL();
-    console.time('thời gian/ khung ảnh');
+    // console.time('thời gian/ khung ảnh');
     const boxes = await detect_objects_on_image(dataURL);
     await render_prob(boxes);
 }
@@ -103,7 +104,7 @@ async function render_prob(boxes) {
 
         const classPrediction = boxes[0][4] + ": " + boxes[0][5].toFixed(2);
         labelContainer.childNodes[0].innerHTML = classPrediction;
-        console.timeEnd('thời gian/ khung ảnh');
+        // console.timeEnd('thời gian/ khung ảnh');
 
         var idClassName;
         if (boxes[0][4] == 'Sâu đục thân') {
@@ -146,8 +147,7 @@ async function render_prob(boxes) {
 
     } else {
         labelContainer.childNodes[0].innerHTML = "Unknow"
-        console.timeEnd('thời gian/ khung ảnh');
-
+        // console.timeEnd('thời gian/ khung ảnh');
         table_vid.setAttribute("class", "table2");
     }
 }

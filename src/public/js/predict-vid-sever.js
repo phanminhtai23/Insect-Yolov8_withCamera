@@ -1,16 +1,18 @@
 
 let webcam, labelContainer, model1;
-// Load the image model and setup the webcam
+
+
+// Tải model và setup webcam
 async function init() {
     count = 0;
     model1 = await ort.InferenceSession.create("../last.onnx");
 
-    // Convenience function to setup a webcam
-    const flip = false; // whether to flip the webcam
-    webcam = new tmImage.Webcam(640, 640, flip); // width, height, flip
-    await webcam.setup({ facingMode: "environment" }); // request access to the webcam
+    // Không lật webcam
+    const flip = false;
+    webcam = new tmImage.Webcam(640, 640, flip); 
+    await webcam.setup({ facingMode: "environment" }); // Dùng cam mặc định
 
-    await webcam.play();
+    await webcam.play(); // mở camera
     window.requestAnimationFrame(loop);
 
     // Nếu chưa tạo thì tạo ô hiển thị nhãn
@@ -58,7 +60,7 @@ async function init() {
         }
     }
 
-    // append elements to the DOM
+    // chèn vào DOM
     document.getElementById("webcam-container").appendChild(webcam.canvas);
     labelContainer = document.getElementById("label-container");
     labelContainer.appendChild(document.createElement("div")); // hiển thị class name
@@ -69,7 +71,7 @@ function webcamStop() {
     webcam.stop();
     count++;
 }
-// asyn
+
 async function loop() {
     if (count > 0) return;
 
@@ -90,7 +92,7 @@ async function loop() {
     window.requestAnimationFrame(loop);
 }
 
-// run the webcam image through the image model
+// Hàm nhận diện
 async function predict() {
 
     // lấy fram ảnh để predict
@@ -102,7 +104,6 @@ async function predict() {
     const dataURL = canvas1.toDataURL();
     // console.log(dataURL);
 
-
     const [input, img_width, img_height] = await prepare_input(dataURL);
 
     const data1 = JSON.stringify({
@@ -110,16 +111,14 @@ async function predict() {
         img_width: img_width,
         img_height: img_height
     });
-    // console.log(data1);
 
-
+    // Lấy tên lớp
     const infor = await getNameClass(data1);
     labelContainer.childNodes[0].innerHTML = infor.name + ': ' + infor.prob;
 
-    // console.log(("nc", nameClass));
+    // Nếu nhận dạng được thì hiển thị thông tin côn trùng ra
     if (infor.name != "unknow") {
         table_vid.setAttribute("class", "table");
-
 
         table_vid.rows[0].cells[0].textContent = "Tên côn trùng:";//
         table_vid.rows[0].cells[1].textContent = infor.infor.ten;
@@ -139,9 +138,8 @@ async function predict() {
         table_vid.rows[3].cells[1].style.whiteSpace = 'pre-line';
         table_vid.rows[4].cells[1].style.whiteSpace = 'pre-line';
 
-        infor_vid.appendChild(table_vid);
+        infor_vid.appendChild(table_vid); // chèn bảng lên giao diện
     } else {
-
         table_vid.setAttribute("class", "table2");
     }
 
@@ -164,7 +162,6 @@ async function getNameClass(data1) {
         })
         .then(data => { // Xử lý dữ liệu trả về từ server
             return data;
-            // labelContainer.childNodes[0].innerHTML = data.name + ': ' + data.prob;
         })
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);

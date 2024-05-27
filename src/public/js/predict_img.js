@@ -1,42 +1,20 @@
-// async function myModel() {
-//     const model = await ort.InferenceSession.create("last.onnx");
-//     // console.log(model);
-//     console.log("load model ok");
-//     return model;
-// }
-
-function downloadImage(imageUrl) {
-    var link = document.createElement('a');
-    link.href = imageUrl;
-    link.download = '';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-}
+const min_prob = 0.5
 
 const input = document.getElementById("uploadInput");
 input.addEventListener("change", async (event) => {
     const dataurl = URL.createObjectURL(event.target.files[0])
 
-    console.time('Image prediction time');
+    console.time('Thời gian nhận diện hình ảnh: ');
     const boxes = await detect_objects_on_image(dataurl);
-    console.timeEnd('Image prediction time');
+    console.timeEnd('Thời gian nhận diện hình ảnh: ');
 
     draw_image_and_boxes(event.target.files[0], boxes);
 })
 
-/**
- * Function draws the image from provided file
- * and bounding boxes of detected objects on
- * top of the image
- * @param file Uploaded file object
- * @param boxes Array of bounding boxes in format [[x1,y1,x2,y2,object_type,probability],...]
- */
-
 
 // hiển thị xác suất
 function draw_image_and_boxes(file, boxes) {
-    const img = new Image()
+    const img = new Image();
     img.src = URL.createObjectURL(file);
     // nếu bảng in4 đang có thông tin => remove bảng
     var infor = document.getElementById("infor");
@@ -83,7 +61,6 @@ function draw_image_and_boxes(file, boxes) {
     table.style.width = "100%";
     table.style.height = "100%";
 
-    // console.log("boxes   = ", boxes);
     // nếu có phát hiện
     if (boxes.length > 0) {
         table.setAttribute("class", "table");
@@ -94,7 +71,6 @@ function draw_image_and_boxes(file, boxes) {
                 var cell = row.insertCell();
             }
         }
-
         // lấy id
         var id1;
         if (boxes[0][4] == 'Sâu đục thân') {
@@ -146,11 +122,10 @@ function draw_image_and_boxes(file, boxes) {
             });
         // console.log("ok");
 
-    } else {  // không phát hiện côn trùng nào có prob >=0.6
+    } else {  // không phát hiện côn trùng nào có prob >= 0.5
         table.setAttribute("class", "table1");
-        // console.log("Hệ thống không phát hiện côn trùng !");
         var row = table.insertRow();
-        row.textContent = "Hệ thống không phát hiện côn trùng nào cả !";
+        row.textContent = "Hệ thống không phát hiện côn trùng nào trong bộ dữ liệu được huấn luyện!";
     }
     infor.appendChild(table);
 
@@ -169,13 +144,8 @@ async function detect_objects_on_image(buf) {
     return process_output(output, img_width, img_height);
 }
 
-/**
- * Function used to convert input image to tensor,
- * required as an input to YOLOv8 object detection
- * network.
- * @param buf Content of uploaded file
- * @returns Array of pixels
- */
+
+// xử lý xử ảnh thành vector 3 chiều chứa 3 màu của ảnh
 async function prepare_input(buf) {
 
     return new Promise(resolve => {
@@ -202,15 +172,10 @@ async function prepare_input(buf) {
             resolve([input, img_width, img_height])
             // console.timeEnd('time prepare input');
         }
-
     })
 }
 
-/**
- * Function used to pass provided input tensor to YOLOv8 neural network and return result
- * @param input Input pixels array
- * @returns Raw output of neural network as a flat array of numbers
- */
+// hàm nhận diện
 async function run_model(input) {
 
     // console.time('time run model:');
@@ -219,7 +184,6 @@ async function run_model(input) {
     // console.log("input", input);
     const outputs = await model.run({ images: input });
     // console.timeEnd('time run model:');
-    // console.log("output: ", outputs);
 
     return outputs["output0"].data;
 }
@@ -239,7 +203,7 @@ function process_output(output, img_width, img_height) {
         const [class_id, prob] = [...Array(7).keys()]
             .map(col => [col, output[8400 * (col + 4) + index]])
             .reduce((accum, item) => item[1] > accum[1] ? item : accum, [0, 0]);
-        if (prob < 0.5) {
+        if (prob < min_prob) {
             continue;
         }
         const label = yolo_classes[class_id];
@@ -271,19 +235,12 @@ function process_output(output, img_width, img_height) {
  * @param box2 Second box in format: [x1,y1,x2,y2,object_class,probability]
  * @returns Intersection over union ratio as a float number
  */
+// Hàm tính IoU
 function iou(box1, box2) {
     return intersection(box1, box2) / union(box1, box2);
 }
 
-/**
- * Function calculates union area of two boxes.
- *     :param box1: First box in format [x1,y1,x2,y2,object_class,probability]
- *     :param box2: Second box in format [x1,y1,x2,y2,object_class,probability]
- *     :return: Area of the boxes union as a float number
- * @param box1 First box in format [x1,y1,x2,y2,object_class,probability]
- * @param box2 Second box in format [x1,y1,x2,y2,object_class,probability]
- * @returns Area of the boxes union as a float number
- */
+
 function union(box1, box2) {
     const [box1_x1, box1_y1, box1_x2, box1_y2] = box1;
     const [box2_x1, box2_y1, box2_x2, box2_y2] = box2;

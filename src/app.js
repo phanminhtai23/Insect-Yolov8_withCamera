@@ -21,7 +21,7 @@ app.get('/', (req, res) => {
 
 // Route để lấy thông tin côn trùng ID
 app.get('/api/information/:id', (req, res) => {
-    fs.readFile('C:/Users/MINH TAI/Desktop/Nhận dạng côn trùng hại lúa/code/deploy/sever1/src/public/data/data.json', 'utf8', (err, data) => {
+    fs.readFile('./src/public/data/data.json', 'utf8', (err, data) => {
         if (err) {
             console.error('Error reading file:', err);
             return;
@@ -51,7 +51,7 @@ app.post('/api/name', async (req, res) => {
     if (boxes.length > 0) {
         // console.timeEnd("time sever");
 
-        fs.readFile('C:/Users/MINH TAI/Desktop/Nhận dạng côn trùng hại lúa/code/deploy/sever1/src/public/data/data.json', 'utf8', (err, data) => {
+        fs.readFile('./src/public/data/data.json', 'utf8', (err, data) => {
             if (err) {
                 console.error('Lỗi đọc file!!!', err);
                 return;
@@ -115,7 +115,7 @@ async function detect_objects_on_image(input, img_width, img_height) {
 
 async function run_model(input) {
 
-    const model = await onnx.InferenceSession.create("C:/Users/MINH TAI/Desktop/Nhận dạng côn trùng hại lúa/code/deploy/sever1/src/public/last.onnx");
+    const model = await onnx.InferenceSession.create("./src/public/last.onnx");
     input = new onnx.Tensor(Float32Array.from(input), [1, 3, 640, 640]);
     const outputs = await model.run({ images: input });
     return outputs["output0"].data;
